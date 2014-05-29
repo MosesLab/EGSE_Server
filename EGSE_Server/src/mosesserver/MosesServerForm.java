@@ -437,7 +437,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
                 String name = currPortId.getName();
-                if (name.substring(0, 8).equals("/dev/ttyUSB"))
+                if (name.substring(0, 11).equals("/dev/ttyUSB"))
                 {
                     comboBoxComUpPort.addItem(name);
                 }
@@ -729,7 +729,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
                 String name = currPortId.getName();
-                if (name.substring(0, 3).equals("COM"))
+                if (name.substring(0, 11).equals("/dev/ttyUSB"))
                 {
                     comboBoxComDownPort.addItem(name);
                 }
