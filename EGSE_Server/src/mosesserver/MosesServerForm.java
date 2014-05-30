@@ -8,6 +8,7 @@ import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -17,7 +18,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import javax.swing.UIManager; 
 
 /**
@@ -801,21 +801,18 @@ public class MosesServerForm extends javax.swing.JFrame {
                 for(Socket sock : clientSockets)
                 {
                     String buffer = "";
-                    char newChar;
+                    char newChar = ' ';
                     Boolean inPacket = false;
 
-                    BufferedReader in = new BufferedReader(
-                        new InputStreamReader(sock.getInputStream()));
+                     InputStream in = sock.getInputStream();
 
                     /* if this socket is connected and has data ready */
-                    if(sock.isConnected() && in.ready())
+                    if(sock.isConnected())
                     {
                         /* while there is more data to get */
-                        while(in.ready())
+                        while(in.available() > 0)
                         {
                             newChar = (char)in.read();
-                            
-//                            System.out.print((newChar));
 
                             /* if not in a packet, but the new char is the start delimiter */
                             if (!inPacket & (decode(newChar) == StartDelimiter))
