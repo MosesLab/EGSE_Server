@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager; 
 
 /**
@@ -48,7 +50,7 @@ public class MosesServerForm extends javax.swing.JFrame {
     public MosesServerForm() {
         initComponents();
         
-        logger = new DataLogger("C:\\MosesLogs\\");
+        logger = new DataLogger("/home/moses/exitDesktop/EGSE_logs");
     }
 
     /**
@@ -78,7 +80,7 @@ public class MosesServerForm extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         fieldClient = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        fieldServer = new javax.swing.JTextField();
+        fieldIP = new javax.swing.JTextField();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         textAreaRecieved = new javax.swing.JTextArea();
@@ -217,10 +219,14 @@ public class MosesServerForm extends javax.swing.JFrame {
         fieldClient.setEditable(false);
         fieldClient.setText("0");
 
-        jLabel5.setText("Server:");
+        jLabel5.setText("IP:");
 
-        fieldServer.setEditable(false);
-        fieldServer.setText("None");
+        fieldIP.setText("0.0.0.0");
+        fieldIP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fieldIPActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -240,7 +246,7 @@ public class MosesServerForm extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fieldServer, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(fieldIP, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -258,7 +264,7 @@ public class MosesServerForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(fieldServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(fieldIP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -437,10 +443,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
                 String name = currPortId.getName();
-                if (name.substring(0, 11).equals("/dev/ttyUSB"))
-                {
-                    comboBoxComUpPort.addItem(name);
-                }
+                comboBoxComUpPort.addItem(name);
             }
             
             comboBoxComUpPort.setSelectedItem(selectedPort);
@@ -579,6 +582,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             buttonTCPConnect.setEnabled(true);
             buttonTCPDisconnect.setEnabled(false);
             fieldPort.setEnabled(true);
+            fieldIP.setEnabled(true);
         }
         catch(Exception ex)
         {
@@ -588,18 +592,29 @@ public class MosesServerForm extends javax.swing.JFrame {
 
     private void buttonTCPConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonTCPConnectActionPerformed
         try
-        {   
+        {
+            String ipStr = fieldIP.getText();
+            String[] ipStrArray = ipStr.split("\\.");
+            byte[] ip = new byte[4];
+            for(int i = 0; i < ip.length; i++)
+            {
+                ip[i] = (byte)Integer.parseInt(ipStrArray[i]);
+            }
+            
+            
             int port = Integer.parseInt(fieldPort.getText());
-            mainSocket = new ServerSocket(port, 1, InetAddress.getLocalHost());
-            
-            fieldServer.setText(mainSocket.getLocalSocketAddress().toString());
-            
+            mainSocket = new ServerSocket(port, 1, 
+                    InetAddress.getByAddress(ip));
+
+            fieldIP.setText(mainSocket.getInetAddress().toString().replace("/",""));
+
             buttonTCPConnect.setEnabled(false);
             buttonTCPDisconnect.setEnabled(true);
             fieldPort.setEnabled(false);
+            fieldIP.setEnabled(false);
             listenTCP = true;
-            
-            startListenerTCPThread();            
+
+            startListenerTCPThread();
         }
         catch(Exception ex)
         {
@@ -725,19 +740,23 @@ public class MosesServerForm extends javax.swing.JFrame {
 
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
 
+            //System.out.println("In updateDownPorts()");
+            
             while(portEnum.hasMoreElements())
             {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
                 String name = currPortId.getName();
-                if (name.substring(0, 11).equals("/dev/ttyUSB"))
-                {
-                    comboBoxComDownPort.addItem(name);
-                }
+                //System.out.println(name);
+                comboBoxComDownPort.addItem(name);
             }
             
             comboBoxComDownPort.setSelectedItem(selectedPort);
         }
     }//GEN-LAST:event_updateDownPort
+
+    private void fieldIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldIPActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_fieldIPActionPerformed
 
     
     private void startListenerTCPThread()
@@ -802,9 +821,11 @@ public class MosesServerForm extends javax.swing.JFrame {
                 {
                     String buffer = "";
                     char newChar = ' ';
+                    int testInt;
                     Boolean inPacket = false;
 
                      InputStream in = sock.getInputStream();
+                     
 
                     /* if this socket is connected and has data ready */
                     if(sock.isConnected())
@@ -812,7 +833,9 @@ public class MosesServerForm extends javax.swing.JFrame {
                         /* while there is more data to get */
                         while(in.available() > 0)
                         {
-                            newChar = (char)in.read();
+                            //newChar = (char)in.read();
+                            testInt = in.read();
+                             newChar = (char)testInt;
 
                             /* if not in a packet, but the new char is the start delimiter */
                             if (!inPacket & (decode(newChar) == StartDelimiter))
@@ -842,6 +865,8 @@ public class MosesServerForm extends javax.swing.JFrame {
                                 {
                                     /* log packet */
                                     logger.Write(buffer, "tx.log");
+                                    
+                                    System.out.println(buffer);
 
                                     /* Send out packet over Com */
                                     writeCom(buffer);
@@ -1148,8 +1173,8 @@ public class MosesServerForm extends javax.swing.JFrame {
     private javax.swing.JComboBox comboBoxDownBaud;
     private javax.swing.JComboBox comboBoxUpBaud;
     private javax.swing.JTextField fieldClient;
+    private javax.swing.JTextField fieldIP;
     private javax.swing.JTextField fieldPort;
-    private javax.swing.JTextField fieldServer;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

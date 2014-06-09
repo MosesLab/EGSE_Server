@@ -25,7 +25,7 @@ public class SerialConnection {
     public SerialConnection(String in_port, int in_baud, int dataBits, int stopBits, int parityBit) throws Exception
     {
         Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
-        
+         
         while(portEnum.hasMoreElements())
         {
             CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
