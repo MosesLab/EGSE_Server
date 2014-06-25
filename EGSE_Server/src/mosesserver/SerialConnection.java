@@ -6,6 +6,8 @@ package mosesserver;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +27,7 @@ public class SerialConnection {
     public SerialConnection(String in_port, int in_baud, int dataBits, int stopBits, int parityBit) throws Exception
     {
         Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
+
          
         while(portEnum.hasMoreElements())
         {
@@ -48,8 +51,11 @@ public class SerialConnection {
                                         stopBits,
                                         parityBit);
         
+        
         RxStream = serialPort.getInputStream();
         TxStream = serialPort.getOutputStream();
+//        RxStream = new FileInputStream(in_port);
+//        TxStream = new FileOutputStream(in_port);
     }
     
     public void close()
@@ -64,6 +70,6 @@ public class SerialConnection {
     
     public void write(byte[] data) throws IOException
     {
-        TxStream.write(data);
+    TxStream.write(data);
     }
 }

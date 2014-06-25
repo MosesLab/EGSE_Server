@@ -6,21 +6,23 @@ package mosesserver;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
+//import javax.comm.CommPortIdentifier;
+//import javax.comm.SerialPort;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager; 
+import javax.swing.UIManager;
 
 /**
  *
@@ -29,8 +31,8 @@ import javax.swing.UIManager;
 public class MosesServerForm extends javax.swing.JFrame {
 
     static final char StartDelimiter = '%',
-                      StopDelimiter = '^';
-    
+            StopDelimiter = '^';
+
     SerialConnection mainSerialUp = null;
     SerialConnection mainSerialDown = null;
     ServerSocket mainSocket = null;
@@ -38,18 +40,18 @@ public class MosesServerForm extends javax.swing.JFrame {
     Boolean listenSerial = false,
             listenTCP = false;
     Thread listenThreadSerial = null,
-           listenThreadTCP = null,
-           clientListenerTCP = null;
+            listenThreadTCP = null,
+            clientListenerTCP = null;
     ArrayList<Thread> TCPClientListernerThreads = new ArrayList<Thread>();
-    
+
     DataLogger logger;
-    
+
     /**
      * Creates new form MosesServerFrom
      */
     public MosesServerForm() {
         initComponents();
-        
+
         logger = new DataLogger("/home/moses/exitDesktop/EGSE_logs");
     }
 
@@ -120,7 +122,7 @@ public class MosesServerForm extends javax.swing.JFrame {
 
         jLabel2.setText("Baud:");
 
-        comboBoxUpBaud.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1200", "2400", "9600", "19200", "38400", "57600", "115200" }));
+        comboBoxUpBaud.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"1200", "2400", "9600", "19200", "38400", "57600", "115200"}));
 
         buttonComUpDisconnect.setText("Disconnect");
         buttonComUpDisconnect.setEnabled(false);
@@ -137,59 +139,59 @@ public class MosesServerForm extends javax.swing.JFrame {
             }
         });
 
-        comboBoxComUpDataBits.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Data Bits: 5", "Data Bits: 6", "Data Bits: 7", "Data Bits: 8" }));
+        comboBoxComUpDataBits.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Data Bits: 5", "Data Bits: 6", "Data Bits: 7", "Data Bits: 8"}));
         comboBoxComUpDataBits.setSelectedIndex(3);
 
-        comboBoxComUpStopBits.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Stop Bits: 1", "Stop Bits: 1.5", "Stop Bits: 2" }));
+        comboBoxComUpStopBits.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Stop Bits: 1", "Stop Bits: 1.5", "Stop Bits: 2"}));
         comboBoxComUpStopBits.setSelectedIndex(2);
 
-        comboBoxComUpParity.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Parity: None", "Parity: Odd", "Parity: Even", "Parity: Mark", "Parity: Space" }));
+        comboBoxComUpParity.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Parity: None", "Parity: Odd", "Parity: Even", "Parity: Mark", "Parity: Space"}));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(comboBoxUpBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(comboBoxComUpStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(buttonComUpDisconnect)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonComUpConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(comboBoxComUpParity, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(comboBoxComUpPort, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(comboBoxComUpDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 30, Short.MAX_VALUE))
+                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(comboBoxUpBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(comboBoxComUpStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(buttonComUpDisconnect)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(buttonComUpConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(comboBoxComUpParity, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(comboBoxComUpPort, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(comboBoxComUpDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 30, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(comboBoxComUpPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1)
-                    .addComponent(comboBoxComUpDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(comboBoxUpBaud, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addComponent(comboBoxComUpStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(buttonComUpConnect)
-                    .addComponent(buttonComUpDisconnect)
-                    .addComponent(comboBoxComUpParity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(comboBoxComUpPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel1)
+                                .addComponent(comboBoxComUpDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(comboBoxUpBaud, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel2)
+                                .addComponent(comboBoxComUpStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(buttonComUpConnect)
+                                .addComponent(buttonComUpDisconnect)
+                                .addComponent(comboBoxComUpParity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("TCP IP Server"));
@@ -231,45 +233,45 @@ public class MosesServerForm extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonTCPDisconnect, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonTCPConnect))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fieldIP, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fieldClient)))
-                .addContainerGap())
+                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(fieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(buttonTCPDisconnect, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(buttonTCPConnect))
+                                .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(fieldIP, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(fieldClient)))
+                        .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(fieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4)
-                    .addComponent(buttonTCPDisconnect)
-                    .addComponent(buttonTCPConnect))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(fieldIP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(fieldClient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(fieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel4)
+                                .addComponent(buttonTCPDisconnect)
+                                .addComponent(buttonTCPConnect))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel5)
+                                .addComponent(fieldIP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel3)
+                                .addComponent(fieldClient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Packets Recieved (Downlink)"));
@@ -282,12 +284,12 @@ public class MosesServerForm extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
+                jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Packets Sent (Uplink)"));
@@ -300,12 +302,12 @@ public class MosesServerForm extends javax.swing.JFrame {
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3)
+                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane3)
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Downlink Com Port"));
@@ -320,7 +322,7 @@ public class MosesServerForm extends javax.swing.JFrame {
 
         jLabel7.setText("Baud:");
 
-        comboBoxDownBaud.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1200", "2400", "9600", "19200", "38400", "57600", "115200" }));
+        comboBoxDownBaud.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"1200", "2400", "9600", "19200", "38400", "57600", "115200"}));
         comboBoxDownBaud.setSelectedIndex(2);
 
         buttonComDownDisconnect.setText("Disconnect");
@@ -338,106 +340,106 @@ public class MosesServerForm extends javax.swing.JFrame {
             }
         });
 
-        comboBoxComDownDataBits.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Data Bits: 5", "Data Bits: 6", "Data Bits: 7", "Data Bits: 8" }));
+        comboBoxComDownDataBits.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Data Bits: 5", "Data Bits: 6", "Data Bits: 7", "Data Bits: 8"}));
         comboBoxComDownDataBits.setSelectedIndex(3);
 
-        comboBoxComDownStopBits.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Stop Bits: 1", "Stop Bits: 1.5", "Stop Bits: 2" }));
+        comboBoxComDownStopBits.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Stop Bits: 1", "Stop Bits: 1.5", "Stop Bits: 2"}));
         comboBoxComDownStopBits.setSelectedIndex(2);
 
-        comboBoxComDownParity.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Parity: None", "Parity: Odd", "Parity: Even", "Parity: Mark", "Parity: Space" }));
+        comboBoxComDownParity.setModel(new javax.swing.DefaultComboBoxModel(new String[]{"Parity: None", "Parity: Odd", "Parity: Even", "Parity: Mark", "Parity: Space"}));
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(comboBoxDownBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(comboBoxComDownStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(buttonComDownDisconnect)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonComDownConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(comboBoxComDownParity, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(comboBoxComDownPort, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(comboBoxComDownDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 0, Short.MAX_VALUE))
+                jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(comboBoxDownBaud, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(comboBoxComDownStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(buttonComDownDisconnect)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(buttonComDownConnect, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(comboBoxComDownParity, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(comboBoxComDownPort, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(comboBoxComDownDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(comboBoxComDownPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6)
-                    .addComponent(comboBoxComDownDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(comboBoxDownBaud, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7)
-                    .addComponent(comboBoxComDownStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(buttonComDownConnect)
-                    .addComponent(buttonComDownDisconnect)
-                    .addComponent(comboBoxComDownParity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(comboBoxComDownPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel6)
+                                .addComponent(comboBoxComDownDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(comboBoxDownBaud, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel7)
+                                .addComponent(comboBoxComDownStopBits, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(buttonComDownConnect)
+                                .addComponent(buttonComDownDisconnect)
+                                .addComponent(comboBoxComDownParity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                                .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void updateUpPorts(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updateUpPorts
-        if (comboBoxComUpPort.isEnabled())
-        {
+        if (comboBoxComUpPort.isEnabled()) {
             Object selectedPort = comboBoxComUpPort.getSelectedItem();
             comboBoxComUpPort.removeAllItems();
 
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
+          
 
             while(portEnum.hasMoreElements())
             {
@@ -445,16 +447,14 @@ public class MosesServerForm extends javax.swing.JFrame {
                 String name = currPortId.getName();
                 comboBoxComUpPort.addItem(name);
             }
-            
             comboBoxComUpPort.setSelectedItem(selectedPort);
         }
     }//GEN-LAST:event_updateUpPorts
 
     private void buttonComUpDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonComUpDisconnectActionPerformed
-        try
-        {
-            mainSerialUp.close();  
-            
+        try {
+            mainSerialUp.close();
+
             buttonComUpConnect.setEnabled(true);
             buttonComUpDisconnect.setEnabled(false);
             comboBoxUpBaud.setEnabled(true);
@@ -462,76 +462,52 @@ public class MosesServerForm extends javax.swing.JFrame {
             comboBoxComUpDataBits.setEnabled(true);
             comboBoxComUpStopBits.setEnabled(true);
             comboBoxComUpParity.setEnabled(true);
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             System.out.println("\n" + ex.toString());
         }
     }//GEN-LAST:event_buttonComUpDisconnectActionPerformed
 
     private void buttonComUpConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonComUpConnectActionPerformed
-        try
-        {
+        try {
             int dataBits, stopBits, parityBit;
-            
+
             /* determine value for dataBits */
-            if(comboBoxComUpDataBits.getSelectedItem().equals("Data Bits: 5"))
-            {
+            if (comboBoxComUpDataBits.getSelectedItem().equals("Data Bits: 5")) {
                 dataBits = SerialPort.DATABITS_5;
-            }
-            else if(comboBoxComUpDataBits.getSelectedItem().equals("Data Bits: 6"))
-            {
+            } else if (comboBoxComUpDataBits.getSelectedItem().equals("Data Bits: 6")) {
                 dataBits = SerialPort.DATABITS_6;
-            }
-            else if(comboBoxComUpDataBits.getSelectedItem().equals("Data Bits: 7"))
-            {
+            } else if (comboBoxComUpDataBits.getSelectedItem().equals("Data Bits: 7")) {
                 dataBits = SerialPort.DATABITS_7;
-            }
-            else
-            {
+            } else {
                 dataBits = SerialPort.DATABITS_8;
             }
-            
+
             /* determine value for stopBits */
-            if(comboBoxComUpStopBits.getSelectedItem().equals("Stop Bits: 1"))
-            {
+            if (comboBoxComUpStopBits.getSelectedItem().equals("Stop Bits: 1")) {
                 stopBits = SerialPort.STOPBITS_1;
-            }
-            else if(comboBoxComUpStopBits.getSelectedItem().equals("Stop Bits: 1.5"))
-            {
+            } else if (comboBoxComUpStopBits.getSelectedItem().equals("Stop Bits: 1.5")) {
                 stopBits = SerialPort.STOPBITS_1_5;
-            }
-            else
-            {
+            } else {
                 stopBits = SerialPort.STOPBITS_2;
             }
-            
+
             /* determine value for parityBit */
-            if(comboBoxComUpParity.getSelectedItem().equals("Parity: Odd"))
-            {
+            if (comboBoxComUpParity.getSelectedItem().equals("Parity: Odd")) {
                 parityBit = SerialPort.PARITY_ODD;
-            }
-            else if(comboBoxComUpParity.getSelectedItem().equals("Parity: Even"))
-            {
+            } else if (comboBoxComUpParity.getSelectedItem().equals("Parity: Even")) {
                 parityBit = SerialPort.PARITY_EVEN;
-            }
-            else if(comboBoxComUpParity.getSelectedItem().equals("Parity: Space"))
-            {
+            } else if (comboBoxComUpParity.getSelectedItem().equals("Parity: Space")) {
                 parityBit = SerialPort.PARITY_SPACE;
-            }
-            else if(comboBoxComUpParity.getSelectedItem().equals("Parity: Mark"))
-            {
+            } else if (comboBoxComUpParity.getSelectedItem().equals("Parity: Mark")) {
                 parityBit = SerialPort.PARITY_MARK;
-            }
-            else
-            {
+            } else {
                 parityBit = SerialPort.PARITY_NONE;
             }
-            
-            mainSerialUp = new SerialConnection(comboBoxComUpPort.getSelectedItem().toString(), 
+
+            mainSerialUp = new SerialConnection(comboBoxComUpPort.getSelectedItem().toString(),
                     Integer.parseInt(comboBoxUpBaud.getSelectedItem().toString()),
                     dataBits, stopBits, parityBit);
-            
+
             buttonComUpConnect.setEnabled(false);
             buttonComUpDisconnect.setEnabled(true);
             comboBoxUpBaud.setEnabled(false);
@@ -539,74 +515,61 @@ public class MosesServerForm extends javax.swing.JFrame {
             comboBoxComUpDataBits.setEnabled(false);
             comboBoxComUpStopBits.setEnabled(false);
             comboBoxComUpParity.setEnabled(false);
-            
-            
-        }
-        catch(Exception ex)
-        {
+
+        } catch (Exception ex) {
             System.out.println("\n" + ex.toString());
         }
     }//GEN-LAST:event_buttonComUpConnectActionPerformed
 
     private void buttonTCPDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonTCPDisconnectActionPerformed
-        try
-        {   
+        try {
             listenTCP = false;
-            for(Thread t : TCPClientListernerThreads)
-            {
+            for (Thread t : TCPClientListernerThreads) {
                 t.join(10);
             }
-            
-            if (clientSockets != null && clientSockets.size() > 0)
-            for(Socket s : clientSockets)
-            {
-                try
-                {
-                    s.getOutputStream().write("%^".getBytes());
-                    s.close();
+
+            if (clientSockets != null && clientSockets.size() > 0) {
+                for (Socket s : clientSockets) {
+                    try {
+                        s.getOutputStream().write("%^".getBytes());
+                        s.close();
+                    } catch (Exception disConEx) {
+                    }
                 }
-                catch(Exception disConEx)
-                { }
             }
-            
+
             clientSockets = new ArrayList<Socket>();
-            
-            if (mainSocket != null)
-            {
+
+            if (mainSocket != null) {
                 mainSocket.close();
                 mainSocket = null;
             }
-            
+
             fieldClient.setText("0");
-            
+
             buttonTCPConnect.setEnabled(true);
             buttonTCPDisconnect.setEnabled(false);
             fieldPort.setEnabled(true);
             fieldIP.setEnabled(true);
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             System.out.println("\nException in :\"buttonTCPDisconnectActionPerformed\"\n" + ex.toString());
         }
     }//GEN-LAST:event_buttonTCPDisconnectActionPerformed
 
     private void buttonTCPConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonTCPConnectActionPerformed
-        try
-        {
+        try {
             String ipStr = fieldIP.getText();
             String[] ipStrArray = ipStr.split("\\.");
             byte[] ip = new byte[4];
-            for(int i = 0; i < ip.length; i++)
-            {
-                ip[i] = (byte)Integer.parseInt(ipStrArray[i]);
+            for (int i = 0; i < ip.length; i++) {
+                ip[i] = (byte) Integer.parseInt(ipStrArray[i]);
             }
-            
-            
+
             int port = Integer.parseInt(fieldPort.getText());
-            mainSocket = new ServerSocket(port, 1, 
+            mainSocket = new ServerSocket(port, 1,
                     InetAddress.getByAddress(ip));
 
-            fieldIP.setText(mainSocket.getInetAddress().toString().replace("/",""));
+            fieldIP.setText(mainSocket.getInetAddress().toString().replace("/", ""));
 
             buttonTCPConnect.setEnabled(false);
             buttonTCPDisconnect.setEnabled(true);
@@ -615,9 +578,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             listenTCP = true;
 
             startListenerTCPThread();
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             System.out.println("\nException in :\"buttonTCPConnectActionPerformed\"\n" + ex.toString());
         }
     }//GEN-LAST:event_buttonTCPConnectActionPerformed
@@ -629,13 +590,12 @@ public class MosesServerForm extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void buttonComDownDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonComDownDisconnectActionPerformed
-        try
-        {
+        try {
             listenSerial = false;
             listenThreadSerial.stop();
-            
-            mainSerialDown.close();  
-            
+
+            mainSerialDown.close();
+
             buttonComDownConnect.setEnabled(true);
             buttonComDownDisconnect.setEnabled(false);
             comboBoxDownBaud.setEnabled(true);
@@ -643,79 +603,55 @@ public class MosesServerForm extends javax.swing.JFrame {
             comboBoxComDownDataBits.setEnabled(true);
             comboBoxComDownStopBits.setEnabled(true);
             comboBoxComDownParity.setEnabled(true);
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             System.out.println("\n" + ex.toString());
         }
     }//GEN-LAST:event_buttonComDownDisconnectActionPerformed
 
     private void buttonComDownConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonComDownConnectActionPerformed
-        try
-        {
+        try {
             int dataBits, stopBits, parityBit;
-            
+
             /* determine value for dataBits */
-            if(comboBoxComDownDataBits.getSelectedItem().equals("Data Bits: 5"))
-            {
+            if (comboBoxComDownDataBits.getSelectedItem().equals("Data Bits: 5")) {
                 dataBits = SerialPort.DATABITS_5;
-            }
-            else if(comboBoxComDownDataBits.getSelectedItem().equals("Data Bits: 6"))
-            {
+            } else if (comboBoxComDownDataBits.getSelectedItem().equals("Data Bits: 6")) {
                 dataBits = SerialPort.DATABITS_6;
-            }
-            else if(comboBoxComDownDataBits.getSelectedItem().equals("Data Bits: 7"))
-            {
+            } else if (comboBoxComDownDataBits.getSelectedItem().equals("Data Bits: 7")) {
                 dataBits = SerialPort.DATABITS_7;
-            }
-            else
-            {
+            } else {
                 dataBits = SerialPort.DATABITS_8;
             }
-            
+
             /* determine value for stopBits */
-            if(comboBoxComDownStopBits.getSelectedItem().equals("Stop Bits: 1"))
-            {
+            if (comboBoxComDownStopBits.getSelectedItem().equals("Stop Bits: 1")) {
                 stopBits = SerialPort.STOPBITS_1;
-            }
-            else if(comboBoxComDownStopBits.getSelectedItem().equals("Stop Bits: 1.5"))
-            {
+            } else if (comboBoxComDownStopBits.getSelectedItem().equals("Stop Bits: 1.5")) {
                 stopBits = SerialPort.STOPBITS_1_5;
-            }
-            else
-            {
+            } else {
                 stopBits = SerialPort.STOPBITS_2;
             }
-            
+
             /* determine value for parityBit */
-            if(comboBoxComDownParity.getSelectedItem().equals("Parity: Odd"))
-            {
+            if (comboBoxComDownParity.getSelectedItem().equals("Parity: Odd")) {
                 parityBit = SerialPort.PARITY_ODD;
-            }
-            else if(comboBoxComDownParity.getSelectedItem().equals("Parity: Even"))
-            {
+            } else if (comboBoxComDownParity.getSelectedItem().equals("Parity: Even")) {
                 parityBit = SerialPort.PARITY_EVEN;
-            }
-            else if(comboBoxComDownParity.getSelectedItem().equals("Parity: Space"))
-            {
+            } else if (comboBoxComDownParity.getSelectedItem().equals("Parity: Space")) {
                 parityBit = SerialPort.PARITY_SPACE;
-            }
-            else if(comboBoxComDownParity.getSelectedItem().equals("Parity: Mark"))
-            {
+            } else if (comboBoxComDownParity.getSelectedItem().equals("Parity: Mark")) {
                 parityBit = SerialPort.PARITY_MARK;
-            }
-            else
-            {
+            } else {
                 parityBit = SerialPort.PARITY_NONE;
             }
-            
-            mainSerialDown = new SerialConnection(comboBoxComDownPort.getSelectedItem().toString(), 
+
+            mainSerialDown = new SerialConnection(comboBoxComDownPort.getSelectedItem().toString(),
                     Integer.parseInt(comboBoxDownBaud.getSelectedItem().toString()),
                     dataBits, stopBits, parityBit);
-            
+
             listenSerial = true;
             startListenerSerialThread();
-            
+
             buttonComDownConnect.setEnabled(false);
             buttonComDownDisconnect.setEnabled(true);
             comboBoxDownBaud.setEnabled(false);
@@ -723,33 +659,27 @@ public class MosesServerForm extends javax.swing.JFrame {
             comboBoxComDownDataBits.setEnabled(false);
             comboBoxComDownStopBits.setEnabled(false);
             comboBoxComDownParity.setEnabled(false);
-            
-            
-        }
-        catch(Exception ex)
-        {
+
+        } catch (Exception ex) {
             System.out.println("\n" + ex.toString());
         }
     }//GEN-LAST:event_buttonComDownConnectActionPerformed
 
     private void updateDownPort(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updateDownPort
-        if (comboBoxComDownPort.isEnabled())
-        {
+        if (comboBoxComDownPort.isEnabled()) {
             Object selectedPort = comboBoxComDownPort.getSelectedItem();
             comboBoxComDownPort.removeAllItems();
 
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
 
             //System.out.println("In updateDownPorts()");
-            
-            while(portEnum.hasMoreElements())
-            {
+            while (portEnum.hasMoreElements()) {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
                 String name = currPortId.getName();
                 //System.out.println(name);
                 comboBoxComDownPort.addItem(name);
             }
-            
+
             comboBoxComDownPort.setSelectedItem(selectedPort);
         }
     }//GEN-LAST:event_updateDownPort
@@ -758,119 +688,90 @@ public class MosesServerForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldIPActionPerformed
 
-    
-    private void startListenerTCPThread()
-    {        
-        clientListenerTCP = new Thread(new Runnable()
-        {
-            public void run()
-            {
+    private void startListenerTCPThread() {
+        clientListenerTCP = new Thread(new Runnable() {
+            public void run() {
                 clientListenerTCP();
             }
         });
-        clientListenerTCP.start();  
-        
-        listenThreadTCP = new Thread(new Runnable()
-        {
-            public void run()
-            {
+        clientListenerTCP.start();
+
+        listenThreadTCP = new Thread(new Runnable() {
+            public void run() {
                 listenerTCP();
             }
         });
-        listenThreadTCP.start();     
+        listenThreadTCP.start();
     }
-    
-    private void clientListenerTCP()
-    {
-        while(listenTCP)
-        {
-            try
-            {
+
+    private void clientListenerTCP() {
+        while (listenTCP) {
+            try {
                 Socket temp = mainSocket.accept();
                 System.out.println("\nClient Connected: " + temp.getInetAddress().toString());
-                
+
                 clientSockets.add(temp);
                 fieldClient.setText(Integer.toString(clientSockets.size()));
-                
-            }
-            catch(Exception ex)
-            {
+
+            } catch (Exception ex) {
                 System.err.println("\n" + ex.toString());
             }
         }
     }
-    
-    private void listenerTCP()
-    {
+
+    private void listenerTCP() {
         ArrayList<Socket> socksToRemove = new ArrayList<Socket>();
-        
-        while(listenTCP)
-        {
-            do
-            {
-                try 
-                {
+
+        while (listenTCP) {
+            do {
+                try {
                     Thread.currentThread().sleep(100);
-                } 
-                catch (InterruptedException ex) { }
-            } while(clientSockets.isEmpty());
-            
-            try
-            {
-                for(Socket sock : clientSockets)
-                {
+                } catch (InterruptedException ex) {
+                }
+            } while (clientSockets.isEmpty());
+
+            try {
+                for (Socket sock : clientSockets) {
                     String buffer = "";
                     char newChar = ' ';
                     int testInt;
                     Boolean inPacket = false;
 
-                     InputStream in = sock.getInputStream();
-                     
+                    InputStream in = sock.getInputStream();
+
 
                     /* if this socket is connected and has data ready */
-                    if(sock.isConnected())
-                    {
+                    if (sock.isConnected()) {
                         /* while there is more data to get */
-                        while(in.available() > 0)
-                        {
+                        while (in.available() > 0) {
                             //newChar = (char)in.read();
                             testInt = in.read();
-                             newChar = (char)testInt;
+                            newChar = (char) testInt;
 
                             /* if not in a packet, but the new char is the start delimiter */
-                            if (!inPacket & (decode(newChar) == StartDelimiter))
-                            {
+                            if (!inPacket & (decode(newChar) == StartDelimiter)) {
                                 inPacket = true;
                                 buffer = Character.toString(newChar);
-                            }
-
-                            /* if in packet and new char is not stop delimiter */
-                            else if (inPacket & (decode(newChar) != StopDelimiter))
-                            {
+                            } /* if in packet and new char is not stop delimiter */ 
+                            else if (inPacket & (decode(newChar) != StopDelimiter)) {
                                 buffer += Character.toString(newChar);
-                            }
-
-                            /* if in packet and new char is the stop delimiter */
-                            else if (inPacket & (decode(newChar) == StopDelimiter))
-                            {
+                            } /* if in packet and new char is the stop delimiter */ 
+                            else if (inPacket & (decode(newChar) == StopDelimiter)) {
                                 inPacket = false;
                                 buffer += Character.toString(newChar);
 
                                 /* if packet is empty, end this socket */
-                                if (buffer.equals("%^"))
-                                {
+                                if (buffer.equals("%^")) {
                                     socksToRemove.add(sock);
-                                }
-                                else
-                                {
+                                } else {
                                     /* log packet */
                                     logger.Write(buffer, "tx.log");
-                                    
+
                                     System.out.println(buffer);
 
                                     /* Send out packet over Com */
                                     writeCom(buffer);
-                                    
+
                                     /* let other clients know message was sent to F/C */
                                     echoBack(buffer, sock);
 
@@ -881,64 +782,51 @@ public class MosesServerForm extends javax.swing.JFrame {
                         }
                     }
                 }
-                
+
                 /* remove the bad sockets */
-                for(Socket sock : socksToRemove)
-                {
+                for (Socket sock : socksToRemove) {
                     System.out.println("Client disconnected: " + sock.getInetAddress().toString());
-                    try
-                    {
+                    try {
                         sock.close();
+                    } catch (Exception ex) {
                     }
-                    catch(Exception ex) {}
-                    
+
                     clientSockets.remove(sock);
                     fieldClient.setText(Integer.toString(clientSockets.size()));
                 }
-                
+
                 /* clear the array of bad socks */
                 socksToRemove = new ArrayList<Socket>();
-            }
-            catch(Exception ex)
-            {
+            } catch (Exception ex) {
                 System.err.println("\nException in: \"istenerTCP()\"");
                 System.err.println(ex.toString());
             }
         }
     }
-    
-    private void echoBack(String buffer, Socket origin)
-    {
+
+    private void echoBack(String buffer, Socket origin) {
         /* mask buffer to 7 bits */
         String maskedBuffer = "";
-        for(int i = 0; i < buffer.length(); i++)
-        {
-            maskedBuffer += (char)(0x7F & (int)buffer.charAt(i));
+        for (int i = 0; i < buffer.length(); i++) {
+            maskedBuffer += (char) (0x7F & (int) buffer.charAt(i));
         }
-        
-        for(Socket s : clientSockets)
-        {
-            try
-            {
-                if (s == null || s.isClosed())
-                {
+
+        for (Socket s : clientSockets) {
+            try {
+                if (s == null || s.isClosed()) {
                     /* clear out clients that terminated w/o sending a "%^" packet */
                     clientSockets.remove(s);
                     fieldClient.setText(Integer.toString(clientSockets.size()));
                     System.out.println("\nClient Removed: " + s.getInetAddress().toString());
-                    
-                }
-                else if(!s.equals(origin))
-                {
+
+                } else if (!s.equals(origin)) {
                     /* Extra "%" indicates to clients that this is a command for the F/C */
                     s.getOutputStream().write(("%" + maskedBuffer).getBytes());
                 }
-            }
-            catch(Exception ex)
-            {                
+            } catch (Exception ex) {
                 System.err.println("\nException in: \"echoBack(String buffer, Socket origin)\"");
                 System.err.println(ex.toString());
-                
+
                 clientSockets.remove(s);
 
                 fieldClient.setText(Integer.toString(clientSockets.size()));
@@ -947,164 +835,130 @@ public class MosesServerForm extends javax.swing.JFrame {
             }
         }
     }
-    
-    private void writeCom(String data)
-    {
-        try
-        {
-            if (mainSerialUp != null)
-            {
+
+    private void writeCom(String data) {
+        try {
+            if (mainSerialUp != null) {
                 /* Write packet object's bytes to TCP/IP output buffer */
-                data += (char)0x04;
-                mainSerialUp.write(data.getBytes());
-                
+                data += (char) 0x04;
+                System.out.println(data.length());
+                byte[] dataBytes = data.getBytes(ISO_8859_1);
+                mainSerialUp.write(dataBytes);
+
                 /* Write packet's masked string to 'Sent Packets' text area */
                 String maskedData = "";
-                for(int i = 0; i < data.length(); i++)
-                {
-                    maskedData += (char)(0x7F & data.charAt(i));
+                for (int i = 0; i < data.length(); i++) {
+                    maskedData += (char) (0x7F & data.charAt(i));
                 }
-                
-                textAreaSent.append((new Date()).toLocaleString() + ":\n" +
-                            maskedData + "\n");
-                    textAreaSent.setCaretPosition(textAreaSent.getDocument().getLength());
-                
+
+                textAreaSent.append((new Date()).toLocaleString() + ":\n"
+                        + maskedData + "\n");
+                textAreaSent.setCaretPosition(textAreaSent.getDocument().getLength());
+
                 System.out.println("\nSent Packet: " + data);
-            }
-            else
-            {
+            } else {
                 System.err.println("\nCan't send packet over Com, no active connection!");
             }
-        }
-        catch(IOException ex)
-        {
+        } catch (IOException ex) {
             System.err.println("\nIOException in: \"writeCom(String data)\"");
             System.err.println("Can't send packet, IO Exception!");
         }
     }
-    
-    private void startListenerSerialThread()
-    {        
-        listenThreadSerial = new Thread(new Runnable()
-        {
-            public void run()
-            {
+
+    private void startListenerSerialThread() {
+        listenThreadSerial = new Thread(new Runnable() {
+            public void run() {
                 listenerSerial();
             }
         });
-        listenThreadSerial.start(); 
+        listenThreadSerial.start();
     }
-    
-    private void listenerSerial()
-    {        
-        try 
-        {            
+
+    private void listenerSerial() {
+        try {
             String buffer = "";
             char newChar;
             Boolean inPacket = false;
-            
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(mainSerialDown.getInputStream()));
 
-            while (listenSerial) 
-            {   
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(mainSerialDown.getInputStream(), ISO_8859_1));
+            
+
+            while (listenSerial) {
                 /* Wait for data */
-                while(!in.ready())
-                {
-                    try 
-                    {
+                while (!in.ready()) {
+                    try {
                         Thread.sleep(1);
-                    } 
-                    catch (InterruptedException ex) 
-                    {
+                    } catch (InterruptedException ex) {
                         Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                
-                newChar = (char)in.read();
 
+                int newInt = in.read();
+                newChar = (char) newInt;
+                char decodedChar = decode(newChar);
+                
                 /* if not in a packet, but the new char is the start delimiter */
-                if (!inPacket & (decode(newChar) == StartDelimiter))
-                {
+                if (!inPacket & (decode(newChar) == StartDelimiter)) {
                     inPacket = true;
                     buffer = Character.toString(newChar);
-                }
-
-                /* if in packet and new char is not stop delimiter */
-                else if (inPacket & (decode(newChar) != StopDelimiter))
-                {
+                } /* if in packet and new char is not stop delimiter */ else if (inPacket & (decode(newChar) != StopDelimiter)) {
                     buffer += Character.toString(newChar);
-                }
-
-                /* if in packet and new char is the stop delimiter */
-                else if (inPacket & (decode(newChar) == StopDelimiter))
-                {
+                } /* if in packet and new char is the stop delimiter */ else if (inPacket & (decode(newChar) == StopDelimiter)) {
                     inPacket = false;
                     buffer += Character.toString(newChar);
-                    
+
                     /* log packet  */
                     logger.Write(buffer, "rx.log");
-                    
+
                     /* send packet  */
                     writeTCP(buffer);
-                    
+
                     /* clear buffer */
                     buffer = "";
-                } 
+                }
             }
 
-        }  
-        catch (IOException ex) 
-        {
-            System.err.println("\nException in: \"listenerSerial()\"");   
-            System.err.println("Couldn't Recieve Data:\n" + ex.toString());                    
+        } catch (IOException ex) {
+            System.err.println("\nException in: \"listenerSerial()\"");
+            System.err.println("Couldn't Recieve Data:\n" + ex.toString());
         }
     }
-    
-    private void writeTCP(String data)
-    {
+
+    private void writeTCP(String data) {
         /* Mask the packet */
         String maskedData = "";
-        for(int i = 0; i < data.length(); i++)
-        {
-            maskedData += (char)(decode(data.charAt(i)));
+        for (int i = 0; i < data.length(); i++) {
+            maskedData += (char) (decode(data.charAt(i)));
         }
 
         /* write the packet to the 'recieved packets text area */
-        textAreaRecieved.append((new Date()).toLocaleString() + ":\n" +
-                            maskedData + "\n");
+        textAreaRecieved.append((new Date()).toLocaleString() + ":\n"
+                + maskedData + "\n");
         textAreaRecieved.setCaretPosition(textAreaRecieved.getDocument().getLength());
-        
-        if (clientSockets != null && clientSockets.size() > 0)
-        {
+
+        if (clientSockets != null && clientSockets.size() > 0) {
             System.out.println("\nReceived Packet: " + data);
-               
+
             /* for each socket */
-            for(Socket sock : clientSockets)
-            {
-                try
-                {
+            for (Socket sock : clientSockets) {
+                try {
                     /* write the masked packet to the socket */
                     sock.getOutputStream().write(maskedData.getBytes());
-                }
-                catch(Exception ex)
-                {
+                } catch (Exception ex) {
                     System.err.println("\nException in: \"writeTCP()\"");
                     System.err.println(ex.toString());
                 }
             }
-        }
-        else
-        {
+        } else {
             System.err.println("\nCan't send packet over TCP, no active connection!");
         }
     }
-    
-    private char decode(char dataByte)
-    {
-        return (char)(0x7F & dataByte);
+
+    private char decode(char dataByte) {
+        return (char) (0x7F & dataByte);
     }
-    
+
     /**
      * @param args the command line arguments
      */
@@ -1131,23 +985,20 @@ public class MosesServerForm extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(MosesServerForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-                
+
         System.out.println("*****************************");
         System.out.println("* Moses Server GSE Software *");
         System.out.println("* Matthew Handley, SSEL     *");
         System.out.println("* Febuarary 2013            *");
         System.out.println("*****************************\n\n");
-        
-        try
-        {
+
+        try {
             String laf = UIManager.getSystemLookAndFeelClassName();
             UIManager.setLookAndFeel(laf);
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             System.out.println("\n" + ex.toString());
         }
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
