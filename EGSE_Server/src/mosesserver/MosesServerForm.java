@@ -944,7 +944,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             for (Socket sock : clientSockets) {
                 try {
                     /* write the masked packet to the socket */
-                    sock.getOutputStream().write(maskedData.getBytes());
+                    sock.getOutputStream().write(maskedData.getBytes(ISO_8859_1));
                 } catch (Exception ex) {
                     System.err.println("\nException in: \"writeTCP()\"");
                     System.err.println(ex.toString());
