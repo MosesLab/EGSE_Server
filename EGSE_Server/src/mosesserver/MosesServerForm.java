@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.*;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -23,15 +25,22 @@ import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.UIManager;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.JButton;
 
 /**
  *
- * @author Matthew Handley
+ * @author Matthew Handley, modified by Nicholas Bonham
  */
 public class MosesServerForm extends javax.swing.JFrame {
 
-    static final char StartDelimiter = '%',
-            StopDelimiter = '^';
+    byte[] udpAddress = new byte[4];
+    byte[] ip = new byte[4];
+    protected DatagramSocket UDPsocket = null;
+    String UDPipString;
+    static final String StartDelimiter = "%%%%%%%%%%",
+            StopDelimiter = "^";
 
     SerialConnection mainSerialUp = null;
     SerialConnection mainSerialDown = null;
@@ -45,6 +54,11 @@ public class MosesServerForm extends javax.swing.JFrame {
     ArrayList<Thread> TCPClientListernerThreads = new ArrayList<Thread>();
 
     DataLogger logger;
+
+    /* Start and Stop Delimiters are now strings, so they need to be converted to char arrays
+     */
+    public static final char[] charstart = StartDelimiter.toCharArray();
+    public static final char[] charstop = StopDelimiter.toCharArray();
 
     /**
      * Creates new form MosesServerFrom
@@ -99,6 +113,13 @@ public class MosesServerForm extends javax.swing.JFrame {
         comboBoxComDownDataBits = new javax.swing.JComboBox();
         comboBoxComDownStopBits = new javax.swing.JComboBox();
         comboBoxComDownParity = new javax.swing.JComboBox();
+        jPanel6 = new javax.swing.JPanel();
+        buttonUDPconnect = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        UDPPort = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        UDPip = new javax.swing.JTextField();
+        buttonUDPdisconnect = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Moses Server");
@@ -117,6 +138,11 @@ public class MosesServerForm extends javax.swing.JFrame {
         comboBoxComUpPort.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 updateUpPorts(evt);
+            }
+        });
+        comboBoxComUpPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboBoxComUpPortActionPerformed(evt);
             }
         });
 
@@ -172,7 +198,7 @@ public class MosesServerForm extends javax.swing.JFrame {
                         .addComponent(comboBoxComUpPort, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(comboBoxComUpDataBits, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 30, Short.MAX_VALUE))
+                .addGap(0, 75, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -215,6 +241,11 @@ public class MosesServerForm extends javax.swing.JFrame {
 
         fieldPort.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         fieldPort.setText("10000");
+        fieldPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fieldPortActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Clients Connected:");
 
@@ -240,8 +271,8 @@ public class MosesServerForm extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(6, 6, 6)
+                        .addComponent(fieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(buttonTCPDisconnect, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -304,7 +335,7 @@ public class MosesServerForm extends javax.swing.JFrame {
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 338, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -318,6 +349,11 @@ public class MosesServerForm extends javax.swing.JFrame {
         comboBoxComDownPort.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 updateDownPort(evt);
+            }
+        });
+        comboBoxComDownPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboBoxComDownPortActionPerformed(evt);
             }
         });
 
@@ -393,7 +429,75 @@ public class MosesServerForm extends javax.swing.JFrame {
                     .addComponent(buttonComDownConnect)
                     .addComponent(buttonComDownDisconnect)
                     .addComponent(comboBoxComDownParity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(83, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("UDP Server"));
+
+        buttonUDPconnect.setText("Connect");
+        buttonUDPconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUDPconnectActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setText("Port:");
+
+        jLabel9.setText("IP:");
+
+        UDPip.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UDPipActionPerformed(evt);
+            }
+        });
+
+        buttonUDPdisconnect.setText("Disconnect");
+        buttonUDPdisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUDPdisconnectActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel9)
+                            .addComponent(jLabel8))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel6Layout.createSequentialGroup()
+                                .addComponent(UDPPort)
+                                .addGap(92, 92, 92))
+                            .addComponent(UDPip)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(buttonUDPdisconnect)
+                        .addGap(18, 18, 18)
+                        .addComponent(buttonUDPconnect)))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(UDPPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(UDPip, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buttonUDPconnect)
+                    .addComponent(buttonUDPdisconnect))
+                .addGap(26, 26, 26))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -411,8 +515,10 @@ public class MosesServerForm extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -423,7 +529,9 @@ public class MosesServerForm extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -434,20 +542,20 @@ public class MosesServerForm extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+
     private void updateUpPorts(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_updateUpPorts
         if (comboBoxComUpPort.isEnabled()) {
             Object selectedPort = comboBoxComUpPort.getSelectedItem();
             comboBoxComUpPort.removeAllItems();
 
             Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
-          
 
-            while(portEnum.hasMoreElements())
-            {
+            while (portEnum.hasMoreElements()) {
                 CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
                 String name = currPortId.getName();
                 comboBoxComUpPort.addItem(name);
             }
+
             comboBoxComUpPort.setSelectedItem(selectedPort);
         }
     }//GEN-LAST:event_updateUpPorts
@@ -561,7 +669,6 @@ public class MosesServerForm extends javax.swing.JFrame {
         try {
             String ipStr = fieldIP.getText();
             String[] ipStrArray = ipStr.split("\\.");
-            byte[] ip = new byte[4];
             for (int i = 0; i < ip.length; i++) {
                 ip[i] = (byte) Integer.parseInt(ipStrArray[i]);
             }
@@ -689,6 +796,82 @@ public class MosesServerForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_fieldIPActionPerformed
 
+    private void comboBoxComUpPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboBoxComUpPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comboBoxComUpPortActionPerformed
+
+    private void comboBoxComDownPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboBoxComDownPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comboBoxComDownPortActionPerformed
+
+    private void fieldPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_fieldPortActionPerformed
+
+    private void buttonUDPconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUDPconnectActionPerformed
+        try {
+            UDPipString = UDPip.getText();
+            String[] ipStrArray = UDPipString.split("\\.");
+            for (int i = 0; i < udpAddress.length; i++) {
+                udpAddress[i] = (byte) Integer.parseInt(ipStrArray[i]);
+            }
+
+            int port = Integer.parseInt(UDPPort.getText());
+            UDPsocket = new DatagramSocket(8191,
+                    InetAddress.getByAddress(udpAddress));
+
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SocketException Socketexception) {
+            System.err.println("Error creating or accessing the socket. Check connection.");
+        }
+        
+//            String UDPipString = UDPip.getText();
+//            int UDPPortint = Integer.parseInt(UDPipString);
+//        try {
+//            UDPsocket = new DatagramSocket(UDPPortint);
+//        } catch (SocketException ex) {
+//            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        try {
+//            DatagramSocket socket = new DatagramSocket(UDPPortint, InetAddress.getByName(UDPipString));
+//        } catch (SocketException | UnknownHostException ex) {
+//            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+
+        buttonUDPdisconnect.setEnabled(true);
+        UDPip.setEnabled(false);
+        UDPPort.setEnabled(false);
+        comboBoxComUpPort.setEnabled(false);
+        comboBoxComUpDataBits.setEnabled(false);
+        comboBoxUpBaud.setEnabled(false);
+        comboBoxComUpStopBits.setEnabled(false);
+        buttonComUpConnect.setEnabled(false);
+        comboBoxComUpParity.setEnabled(false);
+        buttonComUpDisconnect.setEnabled(false);
+
+    }//GEN-LAST:event_buttonUDPconnectActionPerformed
+
+    private void UDPipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UDPipActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_UDPipActionPerformed
+
+    private void buttonUDPdisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUDPdisconnectActionPerformed
+        buttonUDPconnect.setEnabled(true);
+        buttonUDPdisconnect.setEnabled(false);
+        UDPip.setEnabled(true);
+        UDPPort.setEnabled(true);
+
+        comboBoxComUpPort.setEnabled(true);
+        comboBoxComUpDataBits.setEnabled(true);
+        comboBoxUpBaud.setEnabled(true);
+        comboBoxComUpStopBits.setEnabled(true);
+        buttonComUpConnect.setEnabled(true);
+        comboBoxComUpParity.setEnabled(true);
+        buttonComUpDisconnect.setEnabled(true);
+
+    }//GEN-LAST:event_buttonUDPdisconnectActionPerformed
+
     private void startListenerTCPThread() {
         clientListenerTCP = new Thread(new Runnable() {
             public void run() {
@@ -750,14 +933,12 @@ public class MosesServerForm extends javax.swing.JFrame {
                             newChar = (char) testInt;
 
                             /* if not in a packet, but the new char is the start delimiter */
-                            if (!inPacket & (decode(newChar) == StartDelimiter)) {
+                            if (!inPacket & (decode(newChar) == charstart[0])) {
                                 inPacket = true;
                                 buffer = Character.toString(newChar);
-                            } /* if in packet and new char is not stop delimiter */ 
-                            else if (inPacket & (decode(newChar) != StopDelimiter)) {
+                            } /* if in packet and new char is not stop delimiter */ else if (inPacket & (decode(newChar) != charstop[0])) {
                                 buffer += Character.toString(newChar);
-                            } /* if in packet and new char is the stop delimiter */ 
-                            else if (inPacket & (decode(newChar) == StopDelimiter)) {
+                            } /* if in packet and new char is the stop delimiter */ else if (inPacket & (decode(newChar) == charstop[0])) {
                                 inPacket = false;
                                 buffer += Character.toString(newChar);
 
@@ -857,9 +1038,32 @@ public class MosesServerForm extends javax.swing.JFrame {
                 textAreaSent.setCaretPosition(textAreaSent.getDocument().getLength());
 
                 System.out.println("\nSent Packet: " + data);
+            } else if (UDPsocket != null) {
+                
+                // Write data to UDP Port
+                data += (char) 0x04;
+                System.out.println(data.length());
+                byte[] dataBytes = data.getBytes(ISO_8859_1);
+                String UDPipString = UDPip.getText();
+                String UDPPortString = UDPPort.getText();
+                int UDPPortint = Integer.parseInt(UDPPortString);
+                DatagramPacket bytes = new DatagramPacket(dataBytes, dataBytes.length, InetAddress.getByName(UDPipString), UDPPortint);
+                UDPsocket.send(bytes);
+
+                /* Write packet's masked string to 'Sent Packets' text area */
+                String maskedData = "";
+                for (int i = 0; i < data.length(); i++) {
+                    maskedData += (char) (0x7F & data.charAt(i));
+                }
+
+                textAreaSent.append((new Date()).toLocaleString() + ":\n"
+                        + maskedData + "\n");
+                textAreaSent.setCaretPosition(textAreaSent.getDocument().getLength());
+                
             } else {
                 System.err.println("\nCan't send packet over Com, no active connection!");
             }
+
         } catch (IOException ex) {
             System.err.println("\nIOException in: \"writeCom(String data)\"");
             System.err.println("Can't send packet, IO Exception!");
@@ -883,7 +1087,6 @@ public class MosesServerForm extends javax.swing.JFrame {
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(mainSerialDown.getInputStream(), ISO_8859_1));
-            
 
             while (listenSerial) {
                 /* Wait for data */
@@ -898,14 +1101,14 @@ public class MosesServerForm extends javax.swing.JFrame {
                 int newInt = in.read();
                 newChar = (char) newInt;
                 char decodedChar = decode(newChar);
-                
+
                 /* if not in a packet, but the new char is the start delimiter */
-                if (!inPacket & (decode(newChar) == StartDelimiter)) {
+                if (!inPacket & (decode(newChar) == charstart[0])) {
                     inPacket = true;
                     buffer = Character.toString(newChar);
-                } /* if in packet and new char is not stop delimiter */ else if (inPacket & (decode(newChar) != StopDelimiter)) {
+                } /* if in packet and new char is not stop delimiter */ else if (inPacket & (decode(newChar) != charstop[0])) {
                     buffer += Character.toString(newChar);
-                } /* if in packet and new char is the stop delimiter */ else if (inPacket & (decode(newChar) == StopDelimiter)) {
+                } /* if in packet and new char is the stop delimiter */ else if (inPacket & (decode(newChar) == charstop[0])) {
                     inPacket = false;
                     buffer += Character.toString(newChar);
 
@@ -1008,12 +1211,16 @@ public class MosesServerForm extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField UDPPort;
+    private javax.swing.JTextField UDPip;
     private javax.swing.JButton buttonComDownConnect;
     private javax.swing.JButton buttonComDownDisconnect;
     private javax.swing.JButton buttonComUpConnect;
     private javax.swing.JButton buttonComUpDisconnect;
     private javax.swing.JButton buttonTCPConnect;
     private javax.swing.JButton buttonTCPDisconnect;
+    private javax.swing.JButton buttonUDPconnect;
+    private javax.swing.JButton buttonUDPdisconnect;
     private javax.swing.JComboBox comboBoxComDownDataBits;
     private javax.swing.JComboBox comboBoxComDownParity;
     private javax.swing.JComboBox comboBoxComDownPort;
@@ -1034,11 +1241,14 @@ public class MosesServerForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextArea textAreaRecieved;
