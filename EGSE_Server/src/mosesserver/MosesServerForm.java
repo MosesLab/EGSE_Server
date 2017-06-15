@@ -825,19 +825,6 @@ public class MosesServerForm extends javax.swing.JFrame {
         } catch (SocketException Socketexception) {
             System.err.println("Error creating or accessing the socket. Check connection.");
         }
-        
-//            String UDPipString = UDPip.getText();
-//            int UDPPortint = Integer.parseInt(UDPipString);
-//        try {
-//            UDPsocket = new DatagramSocket(UDPPortint);
-//        } catch (SocketException ex) {
-//            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        try {
-//            DatagramSocket socket = new DatagramSocket(UDPPortint, InetAddress.getByName(UDPipString));
-//        } catch (SocketException | UnknownHostException ex) {
-//            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
-//        }
 
         buttonUDPdisconnect.setEnabled(true);
         UDPip.setEnabled(false);
