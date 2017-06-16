@@ -39,6 +39,11 @@ public class MosesServerForm extends javax.swing.JFrame {
     byte[] ip = new byte[4];
     protected DatagramSocket UDPsocket = null;
     String UDPipString;
+    
+    // Define the Start and Stop Delimiters. The start delimiter precedes the 
+    // packet, and the stop delimiter occurs at the end of the packet.
+    // This ensures the proper transmission of a complete packet by recognizing
+    // these strings.
     static final String StartDelimiter = "%%%%%%%%%%",
             StopDelimiter = "^";
 
@@ -640,7 +645,7 @@ public class MosesServerForm extends javax.swing.JFrame {
             if (clientSockets != null && clientSockets.size() > 0) {
                 for (Socket s : clientSockets) {
                     try {
-                        s.getOutputStream().write("%^".getBytes());
+                        s.getOutputStream().write("%%%%%%%%%%^".getBytes());
                         s.close();
                     } catch (Exception disConEx) {
                     }
@@ -930,7 +935,7 @@ public class MosesServerForm extends javax.swing.JFrame {
                                 buffer += Character.toString(newChar);
 
                                 /* if packet is empty, end this socket */
-                                if (buffer.equals("%^")) {
+                                if (buffer.equals("%%%%%%%%%^")) {
                                     socksToRemove.add(sock);
                                 } else {
                                     /* log packet */
@@ -990,7 +995,7 @@ public class MosesServerForm extends javax.swing.JFrame {
 
                 } else if (!s.equals(origin)) {
                     /* Extra "%" indicates to clients that this is a command for the F/C */
-                    s.getOutputStream().write(("%" + maskedBuffer).getBytes());
+                    s.getOutputStream().write(("%%%%%%%%%%" + maskedBuffer).getBytes());
                 }
             } catch (Exception ex) {
                 System.err.println("\nException in: \"echoBack(String buffer, Socket origin)\"");
