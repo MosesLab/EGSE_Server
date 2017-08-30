@@ -822,12 +822,15 @@ public class MosesServerForm extends javax.swing.JFrame {
             }
 
             int port = Integer.parseInt(UDPPort.getText());
-            UDPsocket = new DatagramSocket(8191,
-                    InetAddress.getByAddress(udpAddress));
+//            UDPsocket = new DatagramSocket(8191,
+//                    InetAddress.getByAddress(udpAddress));
+            
+            UDPsocket = new DatagramSocket();
 
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SocketException Socketexception) {
+//        } catch (UnknownHostException ex) {
+//            Logger.getLogger(MosesServerForm.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        catch (SocketException Socketexception) {
             System.err.println("Error creating or accessing the socket. Check connection.");
         }
 
